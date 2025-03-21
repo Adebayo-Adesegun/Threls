@@ -1,0 +1,7 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "sourceMap": false, // Disable source maps for production
+        "removeComments": true // Remove comments from emitted JavaScript
+    }
+}

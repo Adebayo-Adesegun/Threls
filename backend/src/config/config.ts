@@ -3,9 +3,10 @@ import Joi from 'joi';
 
 dotenv.config();
 
-
 const envSchema = Joi.object({
-    NODE_ENV: Joi.string().valid('development', 'production', 'test').required(),
+    NODE_ENV: Joi.string()
+        .valid('development', 'production', 'test')
+        .required(),
     PORT: Joi.number().default(3000),
     MONGODB_URL: Joi.string().uri().required(),
     JWT_SECRET: Joi.string().required(),
@@ -20,7 +21,9 @@ const envSchema = Joi.object({
     EMAIL_FROM: Joi.string().email().required(),
 }).unknown(true);
 
-const { value: envVars, error } = envSchema.prefs({ errors: { label: 'key' } }).validate(process.env);
+const { value: envVars, error } = envSchema
+    .prefs({ errors: { label: 'key' } })
+    .validate(process.env);
 
 if (error) {
     throw new Error(`Config validation error: ${error.message}`);
@@ -31,19 +34,15 @@ export default {
     port: envVars.PORT,
     mongoose: {
         url: envVars.MONGODB_URL,
-        options: {
-            useCreateIndex: true,
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            useFindAndModify: false,
-        },
     },
     jwt: {
         secret: envVars.JWT_SECRET,
         accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,
         refreshExpirationDays: envVars.JWT_REFRESH_EXPIRATION_DAYS,
-        resetPasswordExpirationMinutes: envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
-        verifyEmailExpirationMinutes: envVars.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
+        resetPasswordExpirationMinutes:
+            envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
+        verifyEmailExpirationMinutes:
+            envVars.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
     },
     email: {
         smtp: {
