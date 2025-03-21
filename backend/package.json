@@ -4,7 +4,7 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "dev": "tsx watch --project tsconfig.dev.json ./src/server.ts",
+        "dev": "TS_CONFIG_PATH=tsconfig.dev.json tsx watch ./src/server.ts",
         "build": "tsc --project tsconfig.prod.json",
         "start": "ts-node --project tsconfig.prod.json ./src/server.ts",
         "prestart": "ts-node -r dotenv/config --project tsconfig.prod.json ./src/config/config.ts",
@@ -29,7 +29,9 @@
         "jsonwebtoken": "^9.0.2",
         "mongoose": "^8.12.1",
         "passport": "^0.7.0",
-        "passport-jwt": "^4.0.1"
+        "passport-jwt": "^4.0.1",
+        "tsconfig-paths": "^4.2.0",
+        "winston": "^3.17.0"
     },
     "devDependencies": {
         "@types/bcrypt": "^5.0.2",
@@ -39,6 +41,7 @@
         "@types/node": "^22.13.10",
         "@types/passport": "^1.0.17",
         "@types/passport-jwt": "^4.0.1",
+        "@types/winston": "^2.4.4",
         "@typescript-eslint/eslint-plugin": "^8.27.0",
         "@typescript-eslint/parser": "^8.27.0",
         "eslint": "^8.57.1",
