@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { supportedCurrencies, billingCyle } from '../config/constants';
+import { supportedCurrencies, billingCycle } from '../config/constants';
 
 const planSchema = new mongoose.Schema(
     {
@@ -22,7 +22,7 @@ const planSchema = new mongoose.Schema(
         billingCycle: {
             type: String,
             required: true,
-            enum: billingCyle,
+            enum: billingCycle,
         },
         isActive: {
             type: Boolean,

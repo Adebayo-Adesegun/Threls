@@ -1,4 +1,5 @@
 module.exports = {
+    root: true,
     env: {
         node: true,
         es2021: true,
@@ -10,6 +11,7 @@ module.exports = {
         project: './tsconfig.json',
         tsconfigRootDir: __dirname,
     },
+    ignorePatterns: ["*.js", "node_modules/", "dist/"],
     extends: [
         'airbnb-base',
         'plugin:@typescript-eslint/recommended',

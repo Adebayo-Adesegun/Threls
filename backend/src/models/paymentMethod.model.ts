@@ -31,7 +31,6 @@ const paymentMethodSchema = new mongoose.Schema(
     },
 );
 
-export const PaymentMethod = mongoose.model(
-    'PaymentMethod',
-    paymentMethodSchema,
-);
+const PaymentMethod = mongoose.model('PaymentMethod', paymentMethodSchema);
+
+export default PaymentMethod;
