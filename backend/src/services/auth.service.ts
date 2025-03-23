@@ -39,6 +39,22 @@ class AuthService {
 
         return { access_token: token, user };
     }
+
+    async register(userData: Partial<Record<string, any>>) {
+        const existingUser = await User.findOne({
+            email: userData.email,
+        }).lean();
+        if (existingUser) {
+            throw new Error('A user with this email already exists.');
+        }
+        const hashedPassword = await bcrypt.hash(userData.password, 10);
+        const user = await User.create({
+            ...userData,
+            password: hashedPassword,
+        });
+        const { password: _, ...userWithoutPassword } = user.toObject();
+        return userWithoutPassword;
+    }
 }
 
 export default AuthService;

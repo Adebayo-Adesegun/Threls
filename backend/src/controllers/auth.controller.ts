@@ -1,25 +1,58 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
+import { POST, route } from 'awilix-express';
+import passport from 'passport';
 import AuthService from '../services/auth.service';
+import Validate from '../middlewares/validateRequest';
+import {
+    loginSchema,
+    registerSchema,
+} from '../validations/auth/auth.validation';
 
+@route('/auth')
 class AuthController {
-    private authService: AuthService;
+    constructor(private readonly authService: AuthService) {}
 
-    constructor(authService: AuthService) {
-        this.authService = authService;
+    // @POST()
+
+    // async login(req: Request, res: Response): Promise<Response> {
+    //     const { email, password } = req.body;
+    //     const result = await this.authService.login(email, password);
+    //     return res.json(result);
+    // }
+
+    @POST()
+    @Validate(loginSchema)
+    @route('/login')
+    async login(req: Request, res: Response) {
+        passport.authenticate(
+            'local',
+            { session: false },
+            async (
+                err: Error | null,
+                user: { email: string },
+                info: { message?: string },
+            ) => {
+                if (err || !user) {
+                    return res
+                        .status(400)
+                        .json({ message: info?.message || 'Login failed' });
+                }
+
+                const token = await this.authService.login(
+                    user.email,
+                    req.body.password,
+                );
+                return res.json(token);
+            },
+        )(req, res);
     }
 
-    async login(
-        req: Request,
-        res: Response,
-        next: NextFunction,
-    ): Promise<void> {
-        try {
-            const { email, password } = req.body;
-            const result = await this.authService.login(email, password);
-            res.json(result);
-        } catch (error) {
-            next(error);
-        }
+    @POST()
+    @route('/register')
+    @Validate(registerSchema)
+    async register(req: Request, res: Response): Promise<Response> {
+        const result = await this.authService.register(req.body);
+        return res.status(201).json(result);
     }
 }
 

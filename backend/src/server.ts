@@ -1,15 +1,25 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { register } from 'tsconfig-paths';
+import { loadControllers } from 'awilix-express';
+
 import passport from 'passport';
 import express from 'express';
 import config from './config/config';
-import authRoutes from './routes/auth.routes';
+
 import connectDB from './config/db';
 import logger from './config/logger';
+import loadContainer from './di-container';
+import errorHandler from './middlewares/errorHandler';
 
 const app = express();
 app.use(express.json());
+loadContainer(app);
+
+app.use(loadControllers('controllers/*.ts', { cwd: __dirname }));
+
+app.use(errorHandler);
+
 const { port, env } = config;
 
 const tsConfigPath =
@@ -33,8 +43,6 @@ try {
 }
 
 app.use(passport.initialize());
-
-app.use('/auth', authRoutes);
 
 // Start server after DB connection
 const startServer = async () => {

@@ -29,6 +29,8 @@ module.exports = {
         'no-underscore-dangle': 'off',
         '@typescript-eslint/no-explicit-any': 'warn',
         '@typescript-eslint/ban-ts-comment': 'off',
+        'no-useless-constructor': "off",
+        "no-empty-function": ["error", { "allow": ["constructors"] }]
     },
     overrides: [
         {
