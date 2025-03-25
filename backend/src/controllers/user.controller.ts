@@ -25,6 +25,25 @@ class UserController {
             );
         return res.status(201).json(newSubscription);
     }
+
+    @route('/subscription/:id/cancel')
+    @POST()
+    async cancelSubscription(req: Request, res: Response): Promise<Response> {
+        const { id: subscriptionId } = req.params;
+        if (!subscriptionId) {
+            return res
+                .status(400)
+                .json({ message: 'Subscription ID required' });
+        }
+        const user = req.user as User;
+        await this.subscriptionService.cancelSubscription(
+            subscriptionId,
+            user._id,
+        );
+        return res
+            .status(200)
+            .json({ message: 'Subscription cancelled successfully' });
+    }
 }
 
 export default UserController;

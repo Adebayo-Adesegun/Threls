@@ -11,6 +11,7 @@ import localStrategy from './config/strategies/local.strategy';
 import jwtStrategy from './config/strategies/jwt.strategy';
 import SubscriptionService from './services/subscription.service';
 import PaymentMethodService from './services/paymentmethod.service';
+import CronService from './services/cron.service';
 
 const loadContainer = (app: Application) => {
     const container = createContainer({
@@ -22,6 +23,7 @@ const loadContainer = (app: Application) => {
         planService: asClass(PlanService),
         subscriptionService: asClass(SubscriptionService),
         paymentMethodService: asClass(PaymentMethodService),
+        cronService: asClass(CronService).singleton(),
         mongoose: asValue(mongoose),
         passport: asValue(passport),
         localStrategy: asFunction(localStrategy).singleton(),
@@ -37,6 +39,9 @@ const loadContainer = (app: Application) => {
 
     app.use(scopePerRequest(container));
     app.use(passport.initialize());
+
+    const cronService = container.resolve<CronService>('cronService');
+    cronService.startJobs();
 };
 
 export default loadContainer;
