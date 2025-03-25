@@ -15,8 +15,15 @@ export default class CronService {
                 'Midnight cron job running at:',
                 new Date().toISOString(),
             );
-            await this.markExpiredSubsAsInactive();
             await this.chargeSubscriptions();
+        });
+
+        cron.schedule('*/7 * * * * *', async () => {
+            logger.info(
+                'Mark expired subscriptions as inactive cron job running at:',
+                new Date().toISOString(),
+            );
+            await this.markExpiredSubsAsInactive();
         });
 
         logger.info('Cron jobs initialized');

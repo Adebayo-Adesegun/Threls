@@ -14,6 +14,7 @@ import errorHandler from './middlewares/errorHandler';
 
 const app = express();
 app.use(express.json());
+
 loadContainer(app);
 
 app.use(loadControllers('controllers/*.ts', { cwd: __dirname }));

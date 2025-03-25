@@ -6,11 +6,15 @@ import SubscriptionService from '../services/subscription.service';
 import createSubcriptionSchema from '../validations/user/createSubscription.validation';
 import { User } from '../interfaces/user/user.interface';
 import { CreateSubscription } from '../interfaces/user/create-subscription.interface';
+import SanitizerService from '../services/sanitizer.service';
 
 @route('/user')
 @before(passport.authenticate('jwt', { session: false }))
 class UserController {
-    constructor(private readonly subscriptionService: SubscriptionService) {}
+    constructor(
+        private readonly subscriptionService: SubscriptionService,
+        private readonly sanitizerService: SanitizerService,
+    ) {}
 
     @POST()
     @route('/subscription')
@@ -24,7 +28,15 @@ class UserController {
                 createSubscription,
                 user._id,
             );
-        return res.status(201).json(newSubscription);
+        return res
+            .status(201)
+            .json(
+                this.sanitizerService.formatResponse(
+                    true,
+                    'suscription created successfully',
+                    newSubscription,
+                ),
+            );
     }
 
     @POST()
@@ -38,7 +50,12 @@ class UserController {
         );
         return res
             .status(200)
-            .json({ message: 'Subscription cancelled successfully' });
+            .json(
+                this.sanitizerService.formatResponse(
+                    true,
+                    'Subscription cancelled successfully',
+                ),
+            );
     }
 }
 

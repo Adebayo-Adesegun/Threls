@@ -11,7 +11,7 @@ class SubscriptionService {
     async createSubscription(
         newsub: CreateSubscription,
         userId: string,
-    ): Promise<InstanceType<typeof Subscription>> {
+    ): Promise<object> {
         const { card, planId } = newsub;
         const plan = await Plan.findById(planId);
 
@@ -58,10 +58,10 @@ class SubscriptionService {
             userId,
             planId: newsub.planId,
             paymentMethodId: paymentMethod?._id,
-            nextBillingDate,
+            nextBillingDate: nextBillingDate.setHours(0, 0, 0, 0),
         });
 
-        return subscription;
+        return subscription.toObject();
     }
 
     async cancelSubscription(
@@ -84,16 +84,17 @@ class SubscriptionService {
     }
 
     async markExpiredSubscriptionsAsInactive(): Promise<boolean> {
-        const today = new Date();
-        const result = await Subscription.updateMany(
-            { nextBillingDate: { $lt: today }, status: 'ACTIVE' },
+        const midnightToday = new Date().setHours(0, 0, 0, 0);
+
+        const { modifiedCount } = await Subscription.updateMany(
+            { nextBillingDate: { $lt: midnightToday }, status: 'ACTIVE' },
             { $set: { status: 'INACTIVE' } },
         );
 
         logger.info(
-            `Marked ${result.modifiedCount} subscriptions as INACTIVE.`,
+            `Marked ${modifiedCount} expired subscriptions as INACTIVE.`,
         );
-        return true;
+        return modifiedCount > 0;
     }
 
     async fetchSubscriptions(
@@ -119,44 +120,52 @@ class SubscriptionService {
         return subscription;
     }
 
-    async chargeActiveSubscriptions() {
+    async chargeActiveSubscriptions(): Promise<boolean> {
         const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalize to midnight for accurate date comparison
+
         const subscriptions = await Subscription.find({
             nextBillingDate: today,
             status: 'ACTIVE',
         });
+
         logger.info(
-            `Found ${subscriptions.length} subscriptions to charge for today`,
+            `Found ${subscriptions.length} subscriptions to charge today.`,
         );
+
         await Promise.all(
             subscriptions.map(async (subscription) => {
-                logger.info(
-                    `Charging user ${subscription.userId} for subscription ${subscription._id}`,
-                );
-                const plan = await Plan.findById(subscription.planId);
-                await Transaction.create({
-                    userId: subscription.userId,
-                    amount: plan?.price,
-                    subscriptionId: subscription._id,
-                });
+                const { userId, _id, planId } = subscription;
+                logger.info(`Charging user ${userId} for subscription ${_id}`);
 
-                const nextBillingDate = new Date();
-
-                if (plan?.billingCycle === 'MONTHLY') {
-                    nextBillingDate.setMonth(today.getMonth() + 1);
-                } else {
-                    nextBillingDate.setFullYear(today.getFullYear() + 1);
+                const plan = await Plan.findById(planId);
+                if (!plan) {
+                    logger.warn(`Plan not found for subscription ${_id}`);
+                    return;
                 }
 
-                const updatedSubscription = subscription;
-                updatedSubscription.nextBillingDate = nextBillingDate;
-                await updatedSubscription.save();
+                await Transaction.create({
+                    userId,
+                    amount: plan.price,
+                    subscriptionId: _id,
+                });
 
-                logger.info(
-                    `Charged user ${subscription.userId} for subscription ${subscription._id}`,
-                );
+                // Determine next billing date
+                const nextBillingDate = new Date(today);
+                if (plan.billingCycle === 'MONTHLY') {
+                    nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+                } else {
+                    nextBillingDate.setFullYear(
+                        nextBillingDate.getFullYear() + 1,
+                    );
+                }
+
+                await Subscription.updateOne({ _id }, { nextBillingDate });
+
+                logger.info(`Charged user ${userId} for subscription ${_id}`);
             }),
         );
+
         return true;
     }
 }

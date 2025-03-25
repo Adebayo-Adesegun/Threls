@@ -4,6 +4,7 @@ import { Application } from 'express';
 import mongoose from 'mongoose';
 import passport from 'passport';
 import connectDB from './config/db';
+import { Request, Response, NextFunction } from 'express';
 import logger from './config/logger';
 import PlanService from './services/plan.service';
 import AuthService from './services/auth.service';
@@ -12,6 +13,7 @@ import jwtStrategy from './config/strategies/jwt.strategy';
 import SubscriptionService from './services/subscription.service';
 import PaymentMethodService from './services/paymentmethod.service';
 import CronService from './services/cron.service';
+import SanitizerService from './services/sanitizer.service';
 
 const loadContainer = (app: Application) => {
     const container = createContainer({
@@ -24,6 +26,7 @@ const loadContainer = (app: Application) => {
         subscriptionService: asClass(SubscriptionService),
         paymentMethodService: asClass(PaymentMethodService),
         cronService: asClass(CronService).singleton(),
+        sanitizerService: asClass(SanitizerService).singleton(),
         mongoose: asValue(mongoose),
         passport: asValue(passport),
         localStrategy: asFunction(localStrategy).singleton(),

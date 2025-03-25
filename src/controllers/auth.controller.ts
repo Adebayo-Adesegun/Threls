@@ -7,10 +7,14 @@ import {
     loginSchema,
     registerSchema,
 } from '../validations/auth/auth.validation';
+import SanitizerService from '../services/sanitizer.service';
 
 @route('/auth')
 class AuthController {
-    constructor(private readonly authService: AuthService) {}
+    constructor(
+        private readonly authService: AuthService,
+        private readonly sanitizerService: SanitizerService,
+    ) {}
 
     @POST()
     @Validate(loginSchema)
@@ -27,14 +31,25 @@ class AuthController {
                 if (err || !user) {
                     return res
                         .status(400)
-                        .json({ message: info?.message || 'Login failed' });
+                        .json(
+                            this.sanitizerService.formatResponse(
+                                false,
+                                info?.message || 'Login failed',
+                            ),
+                        );
                 }
 
                 const token = await this.authService.login(
                     user.email,
                     req.body.password,
                 );
-                return res.json(token);
+                return res.json(
+                    this.sanitizerService.formatResponse(
+                        true,
+                        'login successful',
+                        token,
+                    ),
+                );
             },
         )(req, res);
     }

@@ -11,6 +11,7 @@
         "baseUrl": "./", // Base directory to resolve non-relative module names
         "experimentalDecorators": true, // Enable experimental support for ES decorators
         "emitDecoratorMetadata": true, // Emit design-type metadata for decorated declarations in source files
+        "typeRoots": ["./node_modules/@types", "./types"],
         "paths": {
             "@src/*": ["src/*"] // Alias for cleaner imports
         }
