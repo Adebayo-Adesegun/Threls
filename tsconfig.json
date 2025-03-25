@@ -16,6 +16,6 @@
             "@src/*": ["src/*"] // Alias for cleaner imports
         }
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "tests/**/*.ts"],
     "exclude": ["node_modules", "dist", ".eslintrc.js"]
 }
