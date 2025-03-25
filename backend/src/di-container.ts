@@ -9,6 +9,8 @@ import PlanService from './services/plan.service';
 import AuthService from './services/auth.service';
 import localStrategy from './config/strategies/local.strategy';
 import jwtStrategy from './config/strategies/jwt.strategy';
+import SubscriptionService from './services/subscription.service';
+import PaymentMethodService from './services/paymentmethod.service';
 
 const loadContainer = (app: Application) => {
     const container = createContainer({
@@ -18,6 +20,8 @@ const loadContainer = (app: Application) => {
     container.register({
         authService: asClass(AuthService),
         planService: asClass(PlanService),
+        subscriptionService: asClass(SubscriptionService),
+        paymentMethodService: asClass(PaymentMethodService),
         mongoose: asValue(mongoose),
         passport: asValue(passport),
         localStrategy: asFunction(localStrategy).singleton(),

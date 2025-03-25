@@ -3,7 +3,7 @@ import { before, GET, POST, route } from 'awilix-express';
 import passport from 'passport';
 import PlanService from '../services/plan.service';
 import Validate from '../middlewares/validateRequest';
-import CreatePlanSchema from '../validations/plan/createPlan.dto';
+import CreatePlanSchema from '../validations/plan/createPlan.validation';
 
 @route('/plan')
 @before(passport.authenticate('jwt', { session: false }))

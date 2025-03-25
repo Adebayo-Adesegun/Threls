@@ -16,7 +16,7 @@ const subscriptionSchema = new mongoose.Schema(
         status: {
             type: String,
             enum: subscriptionStatus,
-            default: 'active',
+            default: 'ACTIVE',
         },
         paymentMethodId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -25,7 +25,8 @@ const subscriptionSchema = new mongoose.Schema(
         },
         nextBillingDate: {
             type: Date,
-            required: true,
+            required: false,
+            default: null,
         },
         cancellationRequested: {
             type: Boolean,

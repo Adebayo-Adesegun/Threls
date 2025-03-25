@@ -10,7 +10,7 @@ const envSchema = Joi.object({
     PORT: Joi.number().default(3000),
     MONGODB_URL: Joi.string().uri().required(),
     JWT_SECRET: Joi.string().required(),
-    JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().required(),
+    JWT_ACCESS_EXPIRATION_SECONDS: Joi.number().required(),
     JWT_REFRESH_EXPIRATION_DAYS: Joi.number().required(),
     JWT_RESET_PASSWORD_EXPIRATION_MINUTES: Joi.number().required(),
     JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: Joi.number().required(),
@@ -37,7 +37,7 @@ export default {
     },
     jwt: {
         secret: envVars.JWT_SECRET,
-        accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,
+        accessExpirationSeconds: envVars.JWT_ACCESS_EXPIRATION_SECONDS,
         refreshExpirationDays: envVars.JWT_REFRESH_EXPIRATION_DAYS,
         resetPasswordExpirationMinutes:
             envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,

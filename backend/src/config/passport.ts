@@ -28,7 +28,7 @@ passport.use(
  */
 export const generateToken = (user: { id: string; email: string }) => {
     return jwt.sign({ id: user.id, email: user.email }, config.jwt.secret, {
-        expiresIn: config.jwt.accessExpirationMinutes || '7d',
+        expiresIn: config.jwt.accessExpirationSeconds || '7d',
     });
 };
 

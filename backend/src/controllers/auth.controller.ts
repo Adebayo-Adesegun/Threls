@@ -12,14 +12,6 @@ import {
 class AuthController {
     constructor(private readonly authService: AuthService) {}
 
-    // @POST()
-
-    // async login(req: Request, res: Response): Promise<Response> {
-    //     const { email, password } = req.body;
-    //     const result = await this.authService.login(email, password);
-    //     return res.json(result);
-    // }
-
     @POST()
     @Validate(loginSchema)
     @route('/login')
