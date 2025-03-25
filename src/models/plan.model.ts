@@ -34,6 +34,6 @@ const planSchema = new mongoose.Schema(
     },
 );
 
-planSchema.index({ name: 1 });
+const Plan = mongoose.model('Plan', planSchema);
 
-export default mongoose.model('Plan', planSchema);
+export default Plan;

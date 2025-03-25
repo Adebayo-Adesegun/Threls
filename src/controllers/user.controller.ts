@@ -5,6 +5,7 @@ import Validate from '../middlewares/validateRequest';
 import SubscriptionService from '../services/subscription.service';
 import createSubcriptionSchema from '../validations/user/createSubscription.validation';
 import { User } from '../interfaces/user/user.interface';
+import { CreateSubscription } from '../interfaces/user/create-subscription.interface';
 
 @route('/user')
 @before(passport.authenticate('jwt', { session: false }))
@@ -15,26 +16,21 @@ class UserController {
     @route('/subscription')
     @Validate(createSubcriptionSchema)
     async createSubScription(req: Request, res: Response): Promise<Response> {
-        const { planId, paymentMethodId } = req.body;
+        const createSubscription = req.body as CreateSubscription;
         const user = req.user as User;
+
         const newSubscription =
             await this.subscriptionService.createSubscription(
+                createSubscription,
                 user._id,
-                planId,
-                paymentMethodId,
             );
         return res.status(201).json(newSubscription);
     }
 
-    @route('/subscription/:id/cancel')
     @POST()
+    @route('/subscription/:id/cancel')
     async cancelSubscription(req: Request, res: Response): Promise<Response> {
         const { id: subscriptionId } = req.params;
-        if (!subscriptionId) {
-            return res
-                .status(400)
-                .json({ message: 'Subscription ID required' });
-        }
         const user = req.user as User;
         await this.subscriptionService.cancelSubscription(
             subscriptionId,

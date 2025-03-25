@@ -10,12 +10,13 @@ export default class CronService {
     startJobs() {
         logger.info('Starting cron jobs...');
 
-        cron.schedule('0 0 * * *', async () => {
+        cron.schedule('*/5 * * * * *', async () => {
             logger.info(
                 'Midnight cron job running at:',
                 new Date().toISOString(),
             );
             await this.markExpiredSubsAsInactive();
+            await this.chargeSubscriptions();
         });
 
         logger.info('Cron jobs initialized');
@@ -26,5 +27,10 @@ export default class CronService {
         logger.info(
             await this.subscriptionService.markExpiredSubscriptionsAsInactive(),
         );
+    }
+
+    private async chargeSubscriptions() {
+        logger.info('Executing chargeSubscriptions');
+        logger.info(await this.subscriptionService.chargeActiveSubscriptions());
     }
 }

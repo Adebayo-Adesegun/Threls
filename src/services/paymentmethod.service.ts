@@ -1,12 +1,12 @@
+import { Card } from '../interfaces/user/card.interface';
 import PaymentMethod from '../models/paymentMethod.model';
 
 class PaymentMethodService {
     async createPaymentMethod(
         userId: string,
-        cardType: string,
-        last4: string,
-        expiryDate: string,
+        card: Card,
     ): Promise<InstanceType<typeof PaymentMethod>> {
+        const { cardType, last4, expiryDate } = card;
         const existingPaymentMethod = await PaymentMethod.findOne({
             userId,
             cardType,
@@ -34,9 +34,20 @@ class PaymentMethodService {
         return createPaymentMethod;
     }
 
-    async fetchPaymentMethod(userId: string) {
+    async fetchPaymentMethods(userId: string) {
         const paymentMethods = await PaymentMethod.find({ userId });
         return paymentMethods;
+    }
+
+    async fetchPaymentMethod(card: Card, userId: string) {
+        const { last4, expiryDate, cardType } = card;
+        const paymentMethod = await PaymentMethod.findOne({
+            last4,
+            expiryDate,
+            cardType,
+            userId,
+        });
+        return paymentMethod;
     }
 }
 
