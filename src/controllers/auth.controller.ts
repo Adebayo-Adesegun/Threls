@@ -59,7 +59,15 @@ class AuthController {
     @Validate(registerSchema)
     async register(req: Request, res: Response): Promise<Response> {
         const result = await this.authService.register(req.body);
-        return res.status(201).json(result);
+        return res
+            .status(201)
+            .json(
+                this.sanitizerService.formatResponse(
+                    true,
+                    'user created successfully',
+                    result,
+                ),
+            );
     }
 }
 

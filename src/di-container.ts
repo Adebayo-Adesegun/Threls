@@ -14,6 +14,7 @@ import SubscriptionService from './services/subscription.service';
 import PaymentMethodService from './services/paymentmethod.service';
 import CronService from './services/cron.service';
 import SanitizerService from './services/sanitizer.service';
+import WebhookService from './services/webhook.service';
 
 const loadContainer = (app: Application) => {
     const container = createContainer({
@@ -27,6 +28,7 @@ const loadContainer = (app: Application) => {
         paymentMethodService: asClass(PaymentMethodService),
         cronService: asClass(CronService).singleton(),
         sanitizerService: asClass(SanitizerService).singleton(),
+        webhookService: asClass(WebhookService).singleton(),
         mongoose: asValue(mongoose),
         passport: asValue(passport),
         localStrategy: asFunction(localStrategy).singleton(),
