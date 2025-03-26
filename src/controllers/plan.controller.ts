@@ -5,6 +5,7 @@ import PlanService from '../services/plan.service';
 import Validate from '../middlewares/validateRequest';
 import CreatePlanSchema from '../validations/plan/createPlan.validation';
 import SanitizerService from '../services/sanitizer.service';
+import authorizeRole from '../middlewares/auth';
 
 @route('/plan')
 @before(passport.authenticate('jwt', { session: false }))
@@ -15,6 +16,7 @@ class PlanController {
     ) {}
 
     @POST()
+    @before(authorizeRole('admin'))
     @Validate(CreatePlanSchema)
     async createPlan(req: Request, res: Response): Promise<Response> {
         const newPlan = await this.planService.createPlan(req.body);
@@ -30,6 +32,7 @@ class PlanController {
     }
 
     @GET()
+    @before(authorizeRole('admin'))
     public async getPlans(req: Request, res: Response): Promise<Response> {
         const plans = await this.planService.getAllPlans();
         return res

@@ -43,8 +43,6 @@ try {
     logger.error(`Failed to load ${tsConfigPath}:`, error);
 }
 
-app.use(passport.initialize());
-
 // Start server after DB connection
 const startServer = async () => {
     await connectDB();
