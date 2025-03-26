@@ -6,6 +6,7 @@
         "test": "jest",
         "test:watch": "jest --watch",
         "test:coverage": "jest --coverage",
+        "test:clear": "jest --clearCache && jest",
         "dev": "tsx watch --tsconfig tsconfig.dev.json ./src/server.ts",
         "build": "tsc --project tsconfig.prod.json",
         "start": "ts-node --project tsconfig.prod.json ./src/server.ts",

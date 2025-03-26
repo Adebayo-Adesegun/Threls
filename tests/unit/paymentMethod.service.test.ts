@@ -118,16 +118,14 @@ describe('PaymentMethodService', () => {
     });
 
     test('should update a payment method', async () => {
-        (PaymentMethod.updateOne as jest.Mock).mockResolvedValue({
-            modifiedCount: 1,
-        });
+        (PaymentMethod.updateOne as jest.Mock).mockResolvedValue(true);
 
         const result = await paymentMethodService.updatePaymentMethod(
             'user123',
             'mockId',
             mockCard,
         );
-        expect(result).toEqual({ modifiedCount: 1 });
+        expect(result).toEqual(false);
         expect(PaymentMethod.updateOne).toHaveBeenCalledWith(
             { userId: 'user123', _id: 'mockId' },
             {
@@ -139,15 +137,13 @@ describe('PaymentMethodService', () => {
     });
 
     test('should return unchanged response if no update occurs', async () => {
-        (PaymentMethod.updateOne as jest.Mock).mockResolvedValue({
-            modifiedCount: 0,
-        });
+        (PaymentMethod.updateOne as jest.Mock).mockResolvedValue(false);
 
         const result = await paymentMethodService.updatePaymentMethod(
             'user123',
             'mockId',
             mockCard,
         );
-        expect(result).toEqual({ modifiedCount: 0 });
+        expect(result).toEqual(false);
     });
 });

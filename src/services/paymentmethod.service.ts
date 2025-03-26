@@ -34,12 +34,17 @@ class PaymentMethodService {
         return createPaymentMethod;
     }
 
-    async fetchPaymentMethods(userId: string) {
+    async fetchPaymentMethods(
+        userId: string,
+    ): Promise<Array<InstanceType<typeof PaymentMethod>>> {
         const paymentMethods = await PaymentMethod.find({ userId });
         return paymentMethods;
     }
 
-    async fetchPaymentMethod(card: Card, userId: string) {
+    async fetchPaymentMethod(
+        card: Card,
+        userId: string,
+    ): Promise<InstanceType<typeof PaymentMethod> | null> {
         const { last4, expiryDate, cardType } = card;
         const paymentMethod = await PaymentMethod.findOne({
             last4,
@@ -47,6 +52,9 @@ class PaymentMethodService {
             cardType,
             userId,
         });
+        if (!paymentMethod) {
+            return null;
+        }
         return paymentMethod;
     }
 
@@ -65,7 +73,7 @@ class PaymentMethodService {
         userId: string,
         paymentMethodId: string,
         card: Card,
-    ) {
+    ): Promise<boolean> {
         const { last4, expiryDate, cardType } = card;
         const updatePaymentMethod = await PaymentMethod.updateOne(
             {
@@ -78,7 +86,7 @@ class PaymentMethodService {
                 cardType,
             },
         );
-        return updatePaymentMethod;
+        return updatePaymentMethod.modifiedCount > 0;
     }
 }
 
