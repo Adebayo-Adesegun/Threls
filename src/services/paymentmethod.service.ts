@@ -49,6 +49,37 @@ class PaymentMethodService {
         });
         return paymentMethod;
     }
+
+    async removePaymentMethod(
+        userId: string,
+        paymentMethodId: string,
+    ): Promise<boolean> {
+        const removePaymentMethod = await PaymentMethod.deleteOne({
+            userId,
+            _id: paymentMethodId,
+        });
+        return removePaymentMethod.deletedCount > 0;
+    }
+
+    async updatePaymentMethod(
+        userId: string,
+        paymentMethodId: string,
+        card: Card,
+    ) {
+        const { last4, expiryDate, cardType } = card;
+        const updatePaymentMethod = await PaymentMethod.updateOne(
+            {
+                userId,
+                _id: paymentMethodId,
+            },
+            {
+                last4,
+                expiryDate,
+                cardType,
+            },
+        );
+        return updatePaymentMethod;
+    }
 }
 
 export default PaymentMethodService;
