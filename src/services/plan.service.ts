@@ -17,4 +17,21 @@ export default class PlanService {
         const plans = await Plan.find().lean();
         return plans;
     }
+
+    async updatePlan(
+        planId: string,
+        updateData: Partial<Record<string, any>>,
+    ): Promise<PlanResponse | null> {
+        const updatedPlan = await Plan.findByIdAndUpdate(planId, updateData, {
+            new: true,
+            runValidators: true,
+            lean: true,
+        });
+
+        if (!updatedPlan) {
+            throw new Error('Plan not found.');
+        }
+
+        return updatedPlan;
+    }
 }
