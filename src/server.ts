@@ -5,6 +5,7 @@ import { loadControllers } from 'awilix-express';
 
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
+import cors from 'cors';
 import config from './config/config';
 
 import connectDB from './config/db';
@@ -14,6 +15,9 @@ import errorHandler from './middlewares/errorHandler';
 import swaggerSpec from './config/swaggerConfig';
 
 const app = express();
+
+app.use(cors());
+
 app.use(express.json());
 
 loadContainer(app);

@@ -6,6 +6,7 @@ export interface PlanResponse {
     currency: string;
     billingCycle: string;
     isActive: boolean;
+    isSubscribed?: boolean,
     createdAt: Date;
     updatedAt: Date;
 }

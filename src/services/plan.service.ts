@@ -1,5 +1,6 @@
 import { PlanResponse } from '../interfaces/plan/plan.interface';
 import Plan from '../models/plan.model';
+import Subscription from '../models/subscription.model';
 
 export default class PlanService {
     async createPlan(
@@ -30,9 +31,21 @@ export default class PlanService {
         return createPlan.toObject();
     }
 
-    async getAllPlans(): Promise<PlanResponse[]> {
-        const plans = await Plan.find().lean();
-        return plans;
+    async getAllPlans(userId: string): Promise<PlanResponse[]> {
+        console.log(userId);
+        const [activeSubscription, plans] = await Promise.all([
+            Subscription.findOne({ userId, status: 'ACTIVE' }).lean(),
+            Plan.find().lean(),
+        ]);
+
+        console.log(activeSubscription);
+
+        return plans.map((plan) => ({
+            ...plan,
+            isSubscribed: activeSubscription
+                ? activeSubscription.planId.equals(plan._id)
+                : false,
+        }));
     }
 
     async updatePlan(

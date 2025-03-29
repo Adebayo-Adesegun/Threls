@@ -8,7 +8,6 @@ interface CustomRequest extends Request {
 
 const authorizeRole = (role: string) => {
     return (req: CustomRequest, res: Response, next: NextFunction) => {
-        console.log(req.user);
         if (!req.user || req.user.role !== role) {
             return res.status(403).json({
                 success: false,

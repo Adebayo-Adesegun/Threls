@@ -6,6 +6,7 @@ import Validate from '../middlewares/validateRequest';
 import SanitizerService from '../services/sanitizer.service';
 import authorizeRole from '../middlewares/auth';
 import { createPlanSchema } from '../schemas/validations/plan/createPlan.validation';
+import { User } from '../interfaces/user/user.interface';
 
 /**
  * @swagger
@@ -143,7 +144,8 @@ class PlanController {
     @GET()
     @before(authorizeRole('admin'))
     public async getPlans(req: Request, res: Response): Promise<Response> {
-        const plans = await this.planService.getAllPlans();
+        const user = req.user as User;
+        const plans = await this.planService.getAllPlans(user._id);
         return res
             .status(200)
             .json(

@@ -37,11 +37,17 @@ class SubscriptionService {
 
             const existingSubscription = await Subscription.findOne({
                 userId,
-                planId,
                 status: 'ACTIVE',
             }).session(session);
 
             if (existingSubscription) {
+                throw new Error('You already have an active subscription');
+            }
+
+            if (
+                existingSubscription &&
+                existingSubscription.planId?.toString() === planId
+            ) {
                 throw new Error(
                     'You already have an active subscription on this plan',
                 );
@@ -148,7 +154,7 @@ class SubscriptionService {
         return modifiedCount > 0;
     }
 
-    async fetchSubscriptions(
+    async fetchSubscriptionByUserId(
         userId: string,
     ): Promise<InstanceType<typeof Subscription>[]> {
         const subscriptions = await Subscription.find({ userId });
