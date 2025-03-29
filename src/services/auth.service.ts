@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model';
 import config from '../config/config';
+import logger from '../config/logger';
 
 class AuthService {
     /**
@@ -54,6 +55,33 @@ class AuthService {
         });
         const { password: _, ...userWithoutPassword } = user.toObject();
         return userWithoutPassword;
+    }
+
+    async initializeAdminUser() {
+        // This should only run in development environment.
+        if (config.env === 'development') {
+            const adminEmail = 'admin@threls.com';
+
+            // Check if an admin already exists
+            const existingAdmin = await User.findOne({
+                email: adminEmail,
+            }).lean();
+            if (existingAdmin) {
+                logger.info('Admin user already exists.');
+                return;
+            }
+
+            // Create admin user
+            const hashedPassword = await bcrypt.hash('Admin1234', 10);
+            await User.create({
+                name: 'Admin User',
+                email: adminEmail,
+                password: hashedPassword,
+                role: 'admin',
+            });
+
+            logger.info('Admin user created successfully.');
+        }
     }
 }
 

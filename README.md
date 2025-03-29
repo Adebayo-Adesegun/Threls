@@ -11,7 +11,6 @@ Threls is a project designed to provide a robust and scalable backend solution. 
   - [Features](#features)
   - [Documentation](#documentation)
   - [Notes](#notes)
-
 ## Setup
 
 1. Clone the repository:
@@ -139,3 +138,4 @@ This provides an interactive interface to explore and test the API endpoints.
 
 - Ensure MongoDB is running with a properly configured replica set to enable transactions.
 - Use the Swagger UI to test and understand the API.
+- When the app

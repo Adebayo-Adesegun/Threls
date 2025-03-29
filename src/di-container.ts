@@ -38,8 +38,12 @@ const loadContainer = (app: Application) => {
     passport.use(container.resolve('localStrategy'));
     configureJwtStrategy();
 
-    connectDB().then(() => {
+    connectDB().then(async () => {
         logger.info('DB Connection Ready');
+
+        // Ensure admin user exists
+        const authService = container.resolve<AuthService>('authService');
+        await authService.initializeAdminUser();
     });
 
     app.use(scopePerRequest(container));
