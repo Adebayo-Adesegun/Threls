@@ -6,6 +6,7 @@ import PaymentMethodService from './paymentmethod.service';
 import logger from '../config/logger';
 import { CreateSubscription } from '../interfaces/user/create-subscription.interface';
 import Counter from '../models/invoiceCounter.model';
+import PaymentMethod from '../models/paymentMethod.model';
 
 class SubscriptionService {
     constructor(private readonly paymentMethodService: PaymentMethodService) {}
@@ -64,9 +65,9 @@ class SubscriptionService {
             const nextBillingDate = new Date();
 
             if (plan.billingCycle === 'MONTHLY') {
-                nextBillingDate.setMonth(today.getMonth() + 1);
+                nextBillingDate.setUTCMonth(today.getUTCMonth() + 1);
             } else {
-                nextBillingDate.setFullYear(today.getFullYear() + 1);
+                nextBillingDate.setUTCFullYear(today.getUTCFullYear() + 1);
             }
 
             const subscription = await Subscription.create(
@@ -75,7 +76,12 @@ class SubscriptionService {
                         userId,
                         planId,
                         paymentMethodId: paymentMethod?._id,
-                        nextBillingDate: nextBillingDate.setHours(0, 0, 0, 0),
+                        nextBillingDate: nextBillingDate.setUTCHours(
+                            0,
+                            0,
+                            0,
+                            0,
+                        ),
                     },
                 ],
                 { session },
@@ -166,52 +172,98 @@ class SubscriptionService {
     }
 
     async chargeActiveSubscriptions(): Promise<boolean> {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Normalize to midnight for accurate date comparison
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const startOfDay = new Date();
+            startOfDay.setUTCHours(0, 0, 0, 0);
 
-        const subscriptions = await Subscription.find({
-            nextBillingDate: today,
-            status: 'ACTIVE',
-        });
+            const endOfDay = new Date(startOfDay);
+            endOfDay.setUTCHours(23, 59, 59, 999);
 
-        logger.info(
-            `Found ${subscriptions.length} subscriptions to charge today.`,
-        );
+            const subscriptions = await Subscription.find({
+                nextBillingDate: { $gte: startOfDay, $lte: endOfDay },
+                status: 'ACTIVE',
+            }).session(session);
 
-        await Promise.all(
-            subscriptions.map(async (subscription) => {
-                const { userId, _id, planId } = subscription;
-                logger.info(`Charging user ${userId} for subscription ${_id}`);
+            logger.info(
+                `Found ${subscriptions.length} subscriptions to charge today.`,
+            );
 
-                const plan = await Plan.findById(planId);
-                if (!plan) {
-                    logger.warn(`Plan not found for subscription ${_id}`);
-                    return;
-                }
-
-                await Invoice.create({
-                    userId,
-                    amount: plan.price,
-                    subscriptionId: _id,
-                });
-
-                // Determine next billing date
-                const nextBillingDate = new Date(today);
-                if (plan.billingCycle === 'MONTHLY') {
-                    nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
-                } else {
-                    nextBillingDate.setFullYear(
-                        nextBillingDate.getFullYear() + 1,
+            await Promise.all(
+                subscriptions.map(async (subscription) => {
+                    const { userId, _id, planId } = subscription;
+                    logger.info(
+                        `Charging user ${userId} for subscription ${_id}`,
                     );
-                }
 
-                await Subscription.updateOne({ _id }, { nextBillingDate });
+                    const plan = await Plan.findById(planId).session(session);
+                    if (!plan) {
+                        logger.warn(`Plan not found for subscription ${_id}`);
+                        return;
+                    }
 
-                logger.info(`Charged user ${userId} for subscription ${_id}`);
-            }),
-        );
+                    const invoiceId = await this.generateInvoiceId();
+                    const paymentMethod = await PaymentMethod.findOne({
+                        userId,
+                    }).session(session);
+                    if (!paymentMethod) {
+                        logger.warn(
+                            `No payment method found for user ${userId}, skipping charge.`,
+                        );
+                        return;
+                    }
 
-        return true;
+                    await Invoice.create(
+                        [
+                            {
+                                userId,
+                                invoiceId,
+                                paymentMethodId: paymentMethod._id,
+                                subscriptionId: _id,
+                                amount: plan.price,
+                                currency: plan.currency,
+                                status: 'PAID',
+                            },
+                        ],
+                        { session },
+                    );
+
+                    const nextBillingDate = new Date();
+
+                    if (plan.billingCycle === 'MONTHLY') {
+                        nextBillingDate.setUTCMonth(
+                            nextBillingDate.getUTCMonth() + 1,
+                        );
+                    } else {
+                        nextBillingDate.setUTCFullYear(
+                            nextBillingDate.getUTCFullYear() + 1,
+                        );
+                    }
+
+                    // Normalize time to midnight UTC to match MongoDB stored dates
+                    nextBillingDate.setUTCHours(0, 0, 0, 0);
+
+                    await Subscription.updateOne(
+                        { _id },
+                        { nextBillingDate },
+                    ).session(session);
+
+                    logger.info(
+                        `Charged user ${userId} for subscription ${_id}`,
+                    );
+                }),
+            );
+
+            await session.commitTransaction();
+            session.endSession();
+            return true;
+        } catch (error: any) {
+            await session.abortTransaction();
+            session.endSession();
+            logger.error(`Error charging subscriptions: ${error.message}`);
+            return false;
+        }
     }
 }
 
