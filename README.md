@@ -138,4 +138,4 @@ This provides an interactive interface to explore and test the API endpoints.
 
 - Ensure MongoDB is running with a properly configured replica set to enable transactions.
 - Use the Swagger UI to test and understand the API.
-- When the app
+- When the app starts, we run a seed migration to create an admin user who can create and manage plans
