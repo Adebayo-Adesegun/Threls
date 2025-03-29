@@ -9,7 +9,6 @@ Threls is a project designed to provide a robust and scalable backend solution. 
   - [Setup](#setup)
   - [Dependencies](#dependencies)
   - [Features](#features)
-  - [API Endpoints](#api-endpoints)
   - [Documentation](#documentation)
   - [Notes](#notes)
 
@@ -121,19 +120,10 @@ Threls is a project designed to provide a robust and scalable backend solution. 
 ## Features
 
 - **User Authentication**: Secure user login and registration using JWT.
+- **Role and Access managedment** Secure routes based on user roles.
 - **Transaction Support**: Enabled by MongoDB replica sets.
 - **CRUD Operations**: Create, read, update, and delete resources.
 - **API Documentation**: Interactive API documentation using Swagger.
-
-## API Endpoints
-
-| Method | Endpoint         | Description               |
-|--------|------------------|---------------------------|
-| GET    | `/api/users`     | Fetch all users           |
-| POST   | `/api/users`     | Create a new user         |
-| GET    | `/api/users/:id` | Fetch a user by ID        |
-| PUT    | `/api/users/:id` | Update a user by ID       |
-| DELETE | `/api/users/:id` | Delete a user by ID       |
 
 ## Documentation
 
