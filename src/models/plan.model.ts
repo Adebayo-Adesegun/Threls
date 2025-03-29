@@ -9,6 +9,15 @@ const planSchema = new mongoose.Schema(
             trim: true,
             unique: true,
         },
+        description: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        features: {
+            type: [String],
+            required: true,
+        },
         price: {
             type: Number,
             required: true,

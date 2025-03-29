@@ -7,6 +7,8 @@ export default class PlanService {
     ): Promise<PlanResponse> {
         const {
             name,
+            description,
+            features,
             price,
             currency,
             is_active: isActive,
@@ -18,6 +20,8 @@ export default class PlanService {
         }
         const createPlan = await Plan.create({
             name,
+            description,
+            features,
             price,
             currency,
             isActive,

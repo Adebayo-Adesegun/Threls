@@ -5,6 +5,8 @@ import { supportedCurrencies, billingCycle } from '../../../config/constants';
 
 export const createPlanSchema = Joi.object({
     name: Joi.string().required(),
+    description: Joi.string().required(),
+    features: Joi.array().items(Joi.string()).required(),
     price: Joi.number().min(0).required(),
     currency: Joi.string()
         .valid(...supportedCurrencies)
