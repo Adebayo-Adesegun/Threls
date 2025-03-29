@@ -32,13 +32,10 @@ export default class PlanService {
     }
 
     async getAllPlans(userId: string): Promise<PlanResponse[]> {
-        console.log(userId);
         const [activeSubscription, plans] = await Promise.all([
             Subscription.findOne({ userId, status: 'ACTIVE' }).lean(),
             Plan.find().lean(),
         ]);
-
-        console.log(activeSubscription);
 
         return plans.map((plan) => ({
             ...plan,

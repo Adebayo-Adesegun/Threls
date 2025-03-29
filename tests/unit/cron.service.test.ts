@@ -40,11 +40,11 @@ describe('CronService', () => {
         expect(logger.info).toHaveBeenCalledWith('Starting cron jobs...');
         expect(cron.schedule).toHaveBeenCalledTimes(2);
         expect(cron.schedule).toHaveBeenCalledWith(
-            '0 0 * * * *',
+            '0 0 * * *',
             expect.any(Function),
         );
         expect(cron.schedule).toHaveBeenCalledWith(
-            '0 2 * * * *',
+            '0 2 * * *',
             expect.any(Function),
         );
         expect(logger.info).toHaveBeenCalledWith('Cron jobs initialized');

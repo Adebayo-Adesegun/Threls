@@ -1,5 +1,7 @@
+import mongoose from 'mongoose';
 import { PlanResponse } from '../../src/interfaces/plan/plan.interface';
 import Plan from '../../src/models/plan.model';
+import Subscription from '../../src/models/subscription.model';
 import PlanService from '../../src/services/plan.service';
 
 jest.mock('../../src/models/plan.model');
@@ -47,35 +49,37 @@ describe('PlanService', () => {
     });
 
     describe('getAllPlans', () => {
-        it('should return an array of plans', async () => {
-            const mockPlans: PlanResponse[] = [
+        it('should return all plans with isSubscribed as false if no active subscription', async () => {
+            const mockPlans = [
                 {
                     name: 'Basic Plan',
+                    description: 'Basic Plan',
+                    features: ['feat 1', 'feat 2'],
                     price: 10,
-                    currency: '',
-                    billingCycle: '',
-                    isActive: false,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                },
-                {
-                    name: 'Premium Plan',
-                    price: 20,
-                    currency: '',
-                    billingCycle: '',
-                    isActive: false,
+                    currency: 'USD',
+                    billingCycle: 'MONTHLY',
+                    isActive: true,
                     createdAt: new Date(),
                     updatedAt: new Date(),
                 },
             ];
-            (Plan.find as jest.Mock).mockReturnValue({
+    
+            jest.spyOn(Subscription, 'findOne').mockReturnValue({
+                lean: jest.fn().mockResolvedValue(null),
+            } as any);
+    
+            jest.spyOn(Plan, 'find').mockReturnValue({
                 lean: jest.fn().mockResolvedValue(mockPlans),
-            });
-
-            const result = await planService.getAllPlans();
-
-            expect(Plan.find).toHaveBeenCalled();
-            expect(result).toEqual(mockPlans);
+            } as any);
+    
+            const result = await planService.getAllPlans('someUserId');
+    
+            expect(result).toEqual([
+                {
+                    ...mockPlans[0],
+                    isSubscribed: false,
+                },
+            ]);
         });
     });
 
