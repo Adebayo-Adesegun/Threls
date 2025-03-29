@@ -26,7 +26,7 @@ const invoiceSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        curreny: {
+        currency: {
             type: String,
             required: true,
             enum: supportedCurrencies,
