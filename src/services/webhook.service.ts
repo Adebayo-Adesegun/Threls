@@ -10,7 +10,7 @@ export default class WebhookService {
     constructor() {
         this.eventHandlers = {
             subscription_success: this.handleSubscriptionSuccess,
-            transaction_success: this.handleTransactionSuccess,
+            invoice_success: this.handleInvoiceSuccess,
             subscription_cancelled: this.handleSubscriptionCancelled,
         };
     }
@@ -46,8 +46,8 @@ export default class WebhookService {
         logger.info('Handling subscription success:', payload);
     }
 
-    private handleTransactionSuccess(payload: Record<string, unknown>) {
-        logger.info('Handling transaction success:', payload);
+    private handleInvoiceSuccess(payload: Record<string, unknown>) {
+        logger.info('Handling invoice success:', payload);
     }
 
     private handleSubscriptionCancelled(payload: Record<string, unknown>) {

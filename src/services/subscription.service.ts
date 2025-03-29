@@ -1,67 +1,112 @@
+import mongoose from 'mongoose';
 import Subscription from '../models/subscription.model';
 import Plan from '../models/plan.model';
-import Transaction from '../models/transaction.model';
+import Invoice from '../models/invoice.model';
 import PaymentMethodService from './paymentmethod.service';
 import logger from '../config/logger';
 import { CreateSubscription } from '../interfaces/user/create-subscription.interface';
+import Counter from '../models/invoiceCounter.model';
 
 class SubscriptionService {
     constructor(private readonly paymentMethodService: PaymentMethodService) {}
+
+    async generateInvoiceId(): Promise<string> {
+        const counter = await Counter.findOneAndUpdate(
+            { name: 'invoice' },
+            { $inc: { seq: 1 } },
+            { new: true, upsert: true },
+        );
+        return `INV-${counter.seq.toString().padStart(4, '0')}`;
+    }
 
     async createSubscription(
         newsub: CreateSubscription,
         userId: string,
     ): Promise<object> {
-        const { card, planId } = newsub;
-        const plan = await Plan.findById(planId);
+        const session = await mongoose.startSession();
+        session.startTransaction();
 
-        if (!plan) {
-            throw new Error('Plan not found');
-        }
+        try {
+            const { card, plan_id: planId } = newsub;
+            const plan = await Plan.findById(planId).session(session);
 
-        // check if user has an active subscriotion on the plan
-        const existingSubscription = await Subscription.findOne({
-            userId,
-            planId,
-            status: 'ACTIVE',
-        });
+            if (!plan) {
+                throw new Error('Plan not found');
+            }
 
-        if (existingSubscription) {
-            throw new Error(
-                'you already have an active subscription on this plan',
-            );
-        }
-
-        let paymentMethod = await this.paymentMethodService.fetchPaymentMethod(
-            card,
-            userId,
-        );
-
-        // create payment method if it doesn't already exist
-        if (!paymentMethod) {
-            paymentMethod = await this.paymentMethodService.createPaymentMethod(
+            const existingSubscription = await Subscription.findOne({
                 userId,
-                card,
+                planId,
+                status: 'ACTIVE',
+            }).session(session);
+
+            if (existingSubscription) {
+                throw new Error(
+                    'You already have an active subscription on this plan',
+                );
+            }
+
+            let paymentMethod =
+                await this.paymentMethodService.fetchPaymentMethod(
+                    card,
+                    userId,
+                );
+
+            if (!paymentMethod) {
+                paymentMethod =
+                    await this.paymentMethodService.createPaymentMethod(
+                        userId,
+                        card,
+                    );
+            }
+
+            const today = new Date();
+            const nextBillingDate = new Date();
+
+            if (plan.billingCycle === 'MONTHLY') {
+                nextBillingDate.setMonth(today.getMonth() + 1);
+            } else {
+                nextBillingDate.setFullYear(today.getFullYear() + 1);
+            }
+
+            const subscription = await Subscription.create(
+                [
+                    {
+                        userId,
+                        planId,
+                        paymentMethodId: paymentMethod?._id,
+                        nextBillingDate: nextBillingDate.setHours(0, 0, 0, 0),
+                    },
+                ],
+                { session },
             );
+
+            const invoiceId = await this.generateInvoiceId();
+
+            await Invoice.create(
+                [
+                    {
+                        userId,
+                        invoiceId,
+                        paymentMethodId: paymentMethod?._id,
+                        subscriptionId: subscription[0]._id,
+                        amount: plan.price,
+                        currency: plan.currency,
+                        status: 'PAID',
+                    },
+                ],
+                { session },
+            );
+
+            await session.commitTransaction();
+            session.endSession();
+
+            return subscription[0].toObject();
+        } catch (error) {
+            await session.abortTransaction();
+            session.endSession();
+            throw error;
         }
-
-        const today = new Date();
-
-        const nextBillingDate = new Date();
-        if (plan.billingCycle === 'MONTHLY') {
-            nextBillingDate.setMonth(today.getMonth() + 1);
-        } else {
-            nextBillingDate.setFullYear(today.getFullYear() + 1);
-        }
-
-        const subscription = await Subscription.create({
-            userId,
-            planId: newsub.planId,
-            paymentMethodId: paymentMethod?._id,
-            nextBillingDate: nextBillingDate.setHours(0, 0, 0, 0),
-        });
-
-        return subscription.toObject();
     }
 
     async cancelSubscription(
@@ -144,7 +189,7 @@ class SubscriptionService {
                     return;
                 }
 
-                await Transaction.create({
+                await Invoice.create({
                     userId,
                     amount: plan.price,
                     subscriptionId: _id,

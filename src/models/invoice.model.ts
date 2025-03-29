@@ -1,11 +1,15 @@
 import mongoose from 'mongoose';
-import { supportedCurrencies } from '../config/constants';
+import { supportedCurrencies, invoiceStatus } from '../config/constants';
 
-const transactionSchema = new mongoose.Schema(
+const invoiceSchema = new mongoose.Schema(
     {
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
+            required: true,
+        },
+        invoiceId: {
+            type: String,
             required: true,
         },
         paymentMethodId: {
@@ -31,6 +35,8 @@ const transactionSchema = new mongoose.Schema(
         status: {
             type: String,
             required: true,
+            enum: invoiceStatus,
+            default: 'PENDING',
         },
     },
     {
@@ -38,6 +44,6 @@ const transactionSchema = new mongoose.Schema(
     },
 );
 
-const Transaction = mongoose.model('Transaction', transactionSchema);
+const Invoice = mongoose.model('Invoice', invoiceSchema);
 
-export default Transaction;
+export default Invoice;

@@ -3,14 +3,15 @@ import { resolve } from 'path';
 import { register } from 'tsconfig-paths';
 import { loadControllers } from 'awilix-express';
 
-import passport from 'passport';
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
 import config from './config/config';
 
 import connectDB from './config/db';
 import logger from './config/logger';
 import loadContainer from './di-container';
 import errorHandler from './middlewares/errorHandler';
+import swaggerSpec from './config/swaggerConfig';
 
 const app = express();
 app.use(express.json());
@@ -18,6 +19,8 @@ app.use(express.json());
 loadContainer(app);
 
 app.use(loadControllers('controllers/*.ts', { cwd: __dirname }));
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(errorHandler);
 

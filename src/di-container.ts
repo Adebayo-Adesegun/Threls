@@ -14,6 +14,7 @@ import CronService from './services/cron.service';
 import SanitizerService from './services/sanitizer.service';
 import WebhookService from './services/webhook.service';
 import configureJwtStrategy from './config/strategies/jwt.strategy';
+import InvoiceService from './services/invoice.service';
 
 const loadContainer = (app: Application) => {
     const container = createContainer({
@@ -28,6 +29,7 @@ const loadContainer = (app: Application) => {
         cronService: asClass(CronService).singleton(),
         sanitizerService: asClass(SanitizerService).singleton(),
         webhookService: asClass(WebhookService).singleton(),
+        invoiceService: asClass(InvoiceService).singleton(),
         mongoose: asValue(mongoose),
         passport: asValue(passport),
         localStrategy: asFunction(localStrategy).singleton(),

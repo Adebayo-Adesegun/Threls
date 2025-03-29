@@ -1,6 +1,7 @@
 import Joi from 'joi';
+import convert from 'joi-to-swagger';
 
-const loginSchema = Joi.object({
+export const loginSchema = Joi.object({
     email: Joi.string().email().required().messages({
         'string.email': 'Invalid email format',
         'any.required': 'Email is required',
@@ -11,7 +12,7 @@ const loginSchema = Joi.object({
     }),
 });
 
-const registerSchema = Joi.object({
+export const registerSchema = Joi.object({
     name: Joi.string().trim().required().messages({
         'any.required': 'Name is required',
     }),
@@ -30,4 +31,5 @@ const registerSchema = Joi.object({
         }),
 });
 
-export { loginSchema, registerSchema };
+export const { swagger: loginSchemaSwagger } = convert(loginSchema);
+export const { swagger: registerSchemaSwagger } = convert(registerSchema);

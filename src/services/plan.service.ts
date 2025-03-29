@@ -5,11 +5,24 @@ export default class PlanService {
     async createPlan(
         planData: Partial<Record<string, any>>,
     ): Promise<PlanResponse> {
+        const {
+            name,
+            price,
+            currency,
+            is_active: isActive,
+            billing_cycle: billingCycle,
+        } = planData;
         const existingPlan = await Plan.findOne({ name: planData.name }).lean();
         if (existingPlan) {
             throw new Error('A plan with this name already exists.');
         }
-        const createPlan = await Plan.create(planData);
+        const createPlan = await Plan.create({
+            name,
+            price,
+            currency,
+            isActive,
+            billingCycle,
+        });
         return createPlan.toObject();
     }
 

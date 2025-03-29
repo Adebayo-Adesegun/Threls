@@ -6,15 +6,44 @@ import Validate from '../middlewares/validateRequest';
 import {
     loginSchema,
     registerSchema,
-} from '../validations/auth/auth.validation';
+} from '../schemas/validations/auth/auth.validation';
 import SanitizerService from '../services/sanitizer.service';
 
+/**
+ * @swagger
+ * tags:
+ *   - name: Authentication
+ *     description: User authentication APIs
+ */
 @route('/auth')
 class AuthController {
     constructor(
         private readonly authService: AuthService,
         private readonly sanitizerService: SanitizerService,
     ) {}
+
+    /**
+     * @swagger
+     * /auth/login:
+     *   post:
+     *     summary: User login
+     *     tags: [Authentication]
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/Login'
+     *     responses:
+     *       200:
+     *         description: Login successful
+     *         content:
+     *           application/json:
+     *             schema:
+     *              $ref: '#/components/schemas/LoginResponse'
+     *       400:
+     *         description: Login failed
+     */
 
     @POST()
     @Validate(loginSchema)
@@ -54,6 +83,26 @@ class AuthController {
         )(req, res);
     }
 
+    /**
+     * @swagger
+     * /auth/register:
+     *   post:
+     *     summary: Register a new user
+     *     tags: [Authentication]
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/Register'
+     *     responses:
+     *       201:
+     *         description: User created successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/RegisterResponse'
+     */
     @POST()
     @route('/register')
     @Validate(registerSchema)

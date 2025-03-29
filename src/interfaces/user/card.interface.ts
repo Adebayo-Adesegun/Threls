@@ -1,5 +1,5 @@
 export interface Card {
     last4: string;
-    expiryDate: string;
-    cardType: string;
+    expiry_date: string;
+    card_type: string;
 }

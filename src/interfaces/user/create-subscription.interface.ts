@@ -1,6 +1,6 @@
 import { Card } from './card.interface';
 
 export interface CreateSubscription {
-    planId: string;
+    plan_id: string;
     card: Card;
 }
